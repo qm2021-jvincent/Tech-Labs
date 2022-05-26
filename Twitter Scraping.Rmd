@@ -44,8 +44,14 @@ follower_list <- read_excel("file_name.xlsx") #Just replace file_name with the f
 
 #If you see a warning like this: Warning: /1.1/statuses/user_timeline.json - Not authorized.
 #You don't need to do anything. That means it tried to access a Twitter account that was set to private and couldn't. About 1/4-1/3 are like that. 
-
-user_timelines <- get_timelines(follower_list$user_id, n=3200, since_id = '1469227360893427716', retryonratelimit =TRUE, include_rts=FALSE)
+user_timelines <- tibble() #Creating an empty dataframe.
+for(i in 1:nrow(follower_list)){               #For loop!
+temp <- get_timelines(follower_list$user_id[i], n=3200, since_id = '1469227360893427716', retryonratelimit =TRUE, include_rts=FALSE) #Get tweets from each user
+user_timelines <- rbind(user_timelines, temp) #And put them in the dataframe
+if(i %% 180 == 0){ #So, twitter only allows us to ask for a certain number of tweets every 15 minutes. This is just pausing for 15 minutes after going through 180 accounts, so we don't go over. 
+  Sys.sleep(15*60)
+}
+}
 
 #After a while, it'll stop and you can go to the next chunk.  
 ```
